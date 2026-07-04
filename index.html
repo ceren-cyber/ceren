@@ -20,19 +20,29 @@
             overflow: hidden;
         }
 
-        /* Umschlag-Container */
-        .envelope-wrapper {
+        /* Container, der alles hält */
+        .container {
             position: relative;
             width: 450px;
             height: 300px;
+            margin-top: 100px; /* Gibt dem Brief oben Platz zum Ausfahren */
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Wenn geöffnet, bewegt sich der gesamte Container leicht nach unten */
+        .container.open {
+            transform: translateY(100px);
+        }
+
+        /* Umschlag-Container */
+        .envelope-wrapper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
             background-color: #e5e7eb;
             border-radius: 0 0 8px 8px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-        .envelope-wrapper:hover {
-            transform: translateY(-5px);
         }
 
         /* Die obere Klappe des Briefumschlags */
@@ -60,7 +70,7 @@
             overflow: hidden;
         }
         
-        /* Ein schönes Siegel / Button zum Drücken */
+        /* Siegel / Button zum Drücken */
         .seal {
             position: absolute;
             top: 40%;
@@ -88,24 +98,24 @@
             width: 400px;
             background-color: #ffffff;
             border-radius: 4px;
-            padding: 40px 30px;
+            padding: 35px 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             z-index: 1;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.1s ease;
             transform: translateY(0);
             max-height: 280px;
-            opacity: 0.8;
+            opacity: 0;
         }
 
         /* Wenn der Brief geöffnet wird */
-        .envelope-wrapper.open .flap {
+        .container.open .flap {
             transform: rotateX(180deg);
             z-index: 0;
             transition: transform 0.4s ease, z-index 0.2s ease 0.4s;
         }
 
-        .envelope-wrapper.open .letter {
-            transform: translateY(-310px) scale(1.02);
+        .container.open .letter {
+            transform: translateY(-240px);
             z-index: 10;
             max-height: none;
             opacity: 1;
@@ -114,7 +124,7 @@
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s, z-index 0.1s ease 0.4s;
         }
 
-        .envelope-wrapper.open .seal {
+        .container.open .seal {
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
@@ -123,9 +133,9 @@
         /* Brief-Inhalt Styling */
         .letter-title {
             color: #d9534f;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 400;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: center;
             letter-spacing: -0.5px;
         }
@@ -134,7 +144,7 @@
             width: 40px;
             height: 1px;
             background-color: #e5e7eb;
-            margin: 0 auto 25px auto;
+            margin: 0 auto 20px auto;
         }
 
         .letter-text {
@@ -146,15 +156,14 @@
         }
 
         .letter-footer {
-            margin-top: 30px;
+            margin-top: 20px;
             text-align: center;
-            font-size: 13px;
-            color: #9ca3af;
         }
         
+        /* Button ist am Anfang unsichtbar (opacity: 0) */
         .reply-btn {
             display: inline-block;
-            margin-top: 25px;
+            margin-top: 15px;
             background-color: #c8a2c8;
             color: white;
             text-decoration: none;
@@ -162,9 +171,20 @@
             border-radius: 20px;
             font-size: 14px;
             font-weight: 600;
-            transition: background-color 0.2s, transform 0.2s;
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+            transition: opacity 0.6s ease, transform 0.6s ease, background-color 0.2s;
             box-shadow: 0 4px 10px rgba(200, 162, 200, 0.2);
         }
+        
+        /* Diese Klasse wird per JS nach dem Delay hinzugefügt */
+        .reply-btn.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+        
         .reply-btn:hover {
             background-color: #b58eb5;
             transform: scale(1.05);
@@ -173,49 +193,64 @@
 </head>
 <body>
 
-    <!-- Briefumschlag -->
-    <div class="envelope-wrapper" id="envelope">
-        <!-- Obere Klappe -->
-        <div class="flap"></div>
-        
-        <!-- Das Siegel / Der Button -->
-        <div class="seal">Drück mich ✨</div>
-        
-        <!-- Vorderseite des Umschlags -->
-        <div class="envelope-front"></div>
-        
-        <!-- Das versteckte Blatt Papier (Der Brief) -->
-        <div class="letter">
-            <h1 class="letter-title">Für dich ❤️</h1>
-            <div class="letter-divider"></div>
+    <!-- Neuer umschließender Container -->
+    <div class="container" id="cardContainer">
+        <!-- Briefumschlag -->
+        <div class="envelope-wrapper" id="envelope">
+            <!-- Obere Klappe -->
+            <div class="flap"></div>
             
-            <p class="letter-text">
-                hey ich wollte mich entschuldigen dafür das ich dich etwas gestern genervt habe wegen dein schnurbart.
-            </p>
-            <p class="letter-text">
-                ich wollte mich dafür entschulifgen und dir sagen ich liebe dich überalles verzeihst du mir ?
-            </p>
+            <!-- Das Siegel / Der Button -->
+            <div class="seal">Drück mich ✨</div>
             
-            <div class="letter-footer">
-                <a href="#" class="reply-btn" id="replyBtn">Ja, ich verzeihe dir! ☕</a>
+            <!-- Vorderseite des Umschlags -->
+            <div class="envelope-front"></div>
+            
+            <!-- Das versteckte Blatt Papier (Der Brief) -->
+            <div class="letter">
+                <h1 class="letter-title">Für dich ❤️</h1>
+                <div class="letter-divider"></div>
+                
+                <p class="letter-text">
+                    hey ich wollte mich entschuldigen dafür das ich dich etwas gestern genervt habe wegen dein schnurbart.
+                </p>
+                <p class="letter-text">
+                    ich wollte mich dafür entschulifgen und dir sagen ich liebe dich überalles verzeihst du mir ?
+                </p>
+                
+                <div class="letter-footer">
+                    <a href="#" class="reply-btn" id="replyBtn">Ja, ich verzeihe dir! ☕</a>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        const cardContainer = document.getElementById('cardContainer');
         const envelope = document.getElementById('envelope');
         const replyBtn = document.getElementById('replyBtn');
+        let timeoutId = null;
 
-        // Klick-Event für den Umschlag zum Öffnen
+        // Klick-Event auf den Umschlag/Container
         envelope.addEventListener('click', function(e) {
             if (e.target.classList.contains('reply-btn')) return;
-            this.classList.toggle('open');
+            
+            const isOpen = cardContainer.classList.toggle('open');
+            
+            if (isOpen) {
+                // Nach 4 Sekunden blendet sich der Button ein
+                timeoutId = setTimeout(() => {
+                    replyBtn.classList.add('show');
+                }, 4000);
+            } else {
+                clearTimeout(timeoutId);
+                replyBtn.classList.remove('show');
+            }
         });
 
         // Klick-Event für den Antwort-Button
         replyBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            // Ersetze hier bei Bedarf deine E-Mail-Adresse
             window.location.href = "mailto:deine-email@beispiel.de?subject=Ich verzeihe dir! ❤️";
         });
     </script>
